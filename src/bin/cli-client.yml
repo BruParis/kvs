@@ -1,0 +1,51 @@
+name: kvs-client
+version: "0.1.0"
+author: Bruno P. <parisbruno85@gmail.com>
+about: Key Value Storage Client
+
+settings:
+    - ArgRequiredElseHelp
+
+subcommands:
+    - get:
+        about: Not implemented
+        index: 1
+        args:
+            - KEY:
+                required: true
+                help: a string key
+            - addr:
+                help: IP adress with format IP:IP-PORT (default) 127.0.0.1:4000.
+                long: addr
+                value_name: IP-PORT
+                default_value: 127.0.0.1:4000
+                takes_value: true 
+    - set:
+        about: Not implemented
+        index: 2
+        args:
+            - KEY:
+                required: true
+                help: a string key
+            - VAL:
+                required: true
+                help: a string value
+            - addr:
+                help: IP adress with format IP:IP-PORT (default) 127.0.0.1:4000.
+                long: addr
+                value_name: IP-PORT
+                default_value: 127.0.0.1:4000
+                takes_value: true
+    - rm:
+        about: Not implemented
+        index: 3
+        args:
+            - KEY:
+                required: true
+                help: a string key
+            - addr:
+                help: IP adress with format IP:IP-PORT (default) 127.0.0.1:4000.
+                long: addr
+                value_name: IP-PORT
+                default_value: 127.0.0.1:4000
+                takes_value: true

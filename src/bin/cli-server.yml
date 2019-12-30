@@ -1,0 +1,22 @@
+name: kvs
+version: "0.1.0"
+author: Bruno P. <parisbruno85@gmail.com>
+about: Key Value Storage Server
+
+args:
+    - addr:
+        help: IP adress for incoming connections with format IP:IP-PORT (default) 127.0.0.1:4000.
+        short: a
+        long: addr
+        value_name: IP-PORT
+        default_value: 127.0.0.1:4000
+        takes_value: true
+
+    - engine:
+        help: engine launched, either kvs (default) or sled.
+        short: e
+        long: engine
+        value_name: ENGINE-NAME
+        default_value: kvs
+        takes_value: true
+    
