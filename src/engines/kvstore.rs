@@ -5,8 +5,10 @@ use std::io::{BufReader, BufWriter, Seek, SeekFrom};
 use std::path::Path;
 
 use crate::common_struct::{BufReaderPos, BufWriterPos, KVEntry, KVPair};
-use crate::engine::KVEngine;
+use crate::engines::KVEngine;
 use crate::error::{KVError, Result};
+
+const COMPACTION_THRESHOLD: u64 = 20;
 
 pub struct KVStore {
     log_path: String,

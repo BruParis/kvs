@@ -24,6 +24,7 @@ failure = "0.1.6"
 failure_derive = "0.1.6"
 clap = { features = ["yaml"] }
 dotenv_codegen = "0.15.0"
+sled = "0.30.3"
 
 [profile.dev]
 opt-level = 0

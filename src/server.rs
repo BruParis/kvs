@@ -1,6 +1,5 @@
-use crate::engine::KVEngine;
+use crate::engines::{KVEngine, KVStore};
 use crate::error::{KVError, Result};
-use crate::kvstore::KVStore;
 
 pub struct KVServer {
     kvs: KVStore,

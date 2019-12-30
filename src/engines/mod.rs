@@ -1,8 +1,10 @@
 
 use crate::error::{Result};
 
+pub use self::kvstore::KVStore;
 
-const COMPACTION_THRESHOLD: u64 = 20;
+mod kvstore;
+mod sled_kvs;
 
 pub trait KVEngine {
     fn set(&mut self, key: String, value: String) -> Result<()>;
@@ -11,3 +13,4 @@ pub trait KVEngine {
 
     fn remove(&mut self, key: String) -> Result<()>;
 }
+
