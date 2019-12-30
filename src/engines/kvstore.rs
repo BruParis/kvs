@@ -141,6 +141,8 @@ impl KVEngine for KVStore {
         self.writer.append_log_file(&key, &rm_val)?;
         if let Some(entry) = self.index.get_mut(&key) {
             (*entry).rm = true;
+            self.compaction()?;
+
             return Ok(());
         } else {
             return Err(KVError::FailRemove);

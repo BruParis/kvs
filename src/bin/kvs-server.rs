@@ -7,14 +7,16 @@ extern crate slog_async;
 extern crate slog_term;
 
 use clap::App;
-use kvs::{KVRequest, KVServer, Result};
-use serde_json::Deserializer;
+use kvs::{KVEngine, KVRequest, KVServer, KVStore, Result, SledKVEngine};
 use slog::{Drain, Logger};
-use std::io::{BufReader, BufWriter, Read, Write};
-use std::net::{TcpListener, TcpStream};
 use std::process;
 
 // use hello_web_server::ThreadPool;
+
+enum Engine {
+    kvs,
+    sled,
+}
 
 fn main() -> Result<()> {
     let decorator = slog_term::PlainDecorator::new(std::io::stdout());
@@ -50,18 +52,24 @@ fn main() -> Result<()> {
     info!(log, "Storage engine: {}", engine);
     info!(log, "Listening on port: {}", tcpAddr);
 
-    start_server(tcpAddr.to_owned(), &log)?;
+    start_server(tcpAddr.to_owned(), engine.to_owned(), &log)?;
 
     Ok(())
 }
 
-fn start_server(addr: String, log: &Logger) -> Result<()> {
-    let listener = TcpListener::bind(addr)?;
-    let mut kvServer = KVServer::new()?;
-
-    for stream in listener.incoming() {
-        let stream = stream?;
-        handle_connection(&stream, &mut kvServer, &log);
+fn start_server(addr: String, engine: String, log: &Logger) -> Result<()> {
+    let current_path = std::env::current_dir()?;
+    let engine = current_engine(engine, log);
+    match engine {
+        Some(Engine::kvs) => {
+            let mut server = KVServer::new(KVStore::open(&current_path)?);
+            server.run(addr, log)?;
+        }
+        Some(Engine::sled) => {
+            let mut server = KVServer::new(SledKVEngine::open(&current_path)?);
+            server.run(addr, log)?;
+        }
+        None => {}
     }
 
     Ok(())
@@ -77,40 +85,13 @@ fn start_server(addr: String, log: &Logger) -> Result<()> {
     }*/
 }
 
-fn handle_connection(stream: &TcpStream, kvServer: &mut KVServer, log: &Logger) -> Result<()> {
-    let _peer_addr = stream.peer_addr()?;
-    let mut reader = BufReader::new(stream);
-
-    let mut buffer = [0; 512];
-    reader.read(&mut buffer)?;
-
-    let executed = executeCmd(buffer, kvServer, log);
-    let resp: String;
-    match executed {
-        Ok(val) => resp = format!("val {}", val),
-        Err(error) => resp = format!("error {}", error),
-    }
-
-    let mut writer = BufWriter::new(stream);
-    writer.write_all(resp.as_bytes())?;
-
-    Ok(())
-}
-
-fn executeCmd(buffer: [u8; 512], kvServer: &mut KVServer, log: &Logger) -> Result<String> {
-    let serialized: String = buffer.into_iter().map(|c| *c as char).collect();
-    let mut deserialized = Deserializer::from_str(&serialized).into_iter::<KVRequest>();
-    let mut resp = String::from("");
-
-    if let Some(Ok(req_iter)) = deserialized.next() {
-        info!(log, "  -> received request: {:#?}", req_iter);
-
-        match req_iter {
-            KVRequest::Get { key } => resp = kvServer.executeGetCmd(key)?,
-            KVRequest::Set { key, val } => resp = kvServer.executeSetCmd(key, val)?,
-            KVRequest::Rm { key } => resp = kvServer.executeRmCmd(key)?,
+fn current_engine(engine: String, log: &Logger) -> Option<Engine> {
+    match engine.as_ref() {
+        "kvs" => Some(Engine::kvs),
+        "sled" => Some(Engine::sled),
+        _ => {
+            warn!(log, "Error -> engine {} found not found", engine);
+            None
         }
     }
-
-    Ok(resp)
 }

@@ -15,6 +15,8 @@ pub enum KVError {
     },
     #[fail(display = "An Utf8 error happened with the reader: {}", error)]
     Utf8 { error: str::Utf8Error },
+    #[fail(display = "An error occured with sled engine: {}", error)]
+    Sled { error: sled::Error },
     #[fail(display = "{}", _0)]
     FailGet(String),
     #[fail(display = "Error reading entry from log file")]
@@ -23,6 +25,8 @@ pub enum KVError {
     FailSet,
     #[fail(display = "An error occurred.")]
     FailRemove,
+    #[fail(display = "{}", _0)]
+    EngineNotFound(String),
     #[fail(display = "An error occurred.")]
     None,
 }
@@ -48,6 +52,12 @@ impl From<io::IntoInnerError<io::BufWriter<File>>> for KVError {
 impl From<serde_json::error::Error> for KVError {
     fn from(err: serde_json::error::Error) -> KVError {
         KVError::Serde { error: err }
+    }
+}
+
+impl From<sled::Error> for KVError {
+    fn from(err: sled::Error) -> KVError {
+        KVError::Sled { error: err }
     }
 }
 
