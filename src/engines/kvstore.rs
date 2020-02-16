@@ -2,13 +2,14 @@ use serde_json::Deserializer;
 use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter, Seek, SeekFrom};
-use std::path::Path;
 
 use crate::common_struct::{BufReaderPos, BufWriterPos, KVEntry, KVPair};
 use crate::engines::KVEngine;
 use crate::error::{KVError, Result};
 
-const COMPACTION_THRESHOLD: u64 = 20;
+const COMPACTION_THRESHOLD: u64 = 1024;
+
+use std::path::Path;
 
 pub struct KVStore {
     log_path: String,
@@ -21,6 +22,11 @@ impl KVStore {
     pub fn open(dir_path: &Path) -> Result<KVStore> {
         match dir_path.to_str() {
             Some(dir_str) => {
+                let sled_path = format!("{}{}", dir_str, "/my_old_db");
+                if Path::new(&sled_path.to_owned()).exists() {
+                    return Err(KVError::WrongEngine);
+                }
+
                 let log_path = format!("{}{}", dir_str, "/log_file.txt");
                 let writer = writer_log_file(log_path.to_owned())?;
                 let mut reader = reader_log_file(log_path.to_owned())?;

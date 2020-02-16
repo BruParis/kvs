@@ -60,12 +60,16 @@ fn main() -> Result<()> {
 fn start_server(addr: String, engine: String, log: &Logger) -> Result<()> {
     let current_path = std::env::current_dir()?;
     let engine = current_engine(engine, log);
+    
+    info!(log, "start server");
     match engine {
         Some(Engine::kvs) => {
+            info!(log, "    ---> KV Store");
             let mut server = KVServer::new(KVStore::open(&current_path)?);
             server.run(addr, log)?;
         }
         Some(Engine::sled) => {
+            info!(log, "    ---> Sled KV Engine");
             let mut server = KVServer::new(SledKVEngine::open(&current_path)?);
             server.run(addr, log)?;
         }

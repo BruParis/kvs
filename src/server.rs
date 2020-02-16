@@ -51,6 +51,7 @@ impl<E: KVEngine> KVServer<E> {
     }
 
     fn executeCmd(&mut self, buffer: [u8; 512], log: &Logger) -> Result<String> {
+
         let serialized: String = buffer.into_iter().map(|c| *c as char).collect();
         let mut deserialized = Deserializer::from_str(&serialized).into_iter::<KVRequest>();
         let mut resp = String::from("");
@@ -79,6 +80,7 @@ impl<E: KVEngine> KVServer<E> {
     }
 
     fn executeSetCmd(&mut self, key: String, val: String) -> Result<String> {
+
         self.engine.set(key.to_owned(), val.to_owned())?;
         Ok(format!(
             "set key: {} value: {} succesffully done !",
@@ -92,7 +94,7 @@ impl<E: KVEngine> KVServer<E> {
             Err(_) => {
                 println!("Key not found");
                 return Err(KVError::FailGet(format!(
-                    "Failed to get value from key: {}",
+                    "{}",
                     key
                 )));
             }

@@ -8,11 +8,15 @@ edition = "2018"
 
 [dev-dependencies]
 assert_cmd = "0.11"
-criterion = "0.2.11"
+criterion = "0.3.1"
 predicates = "1.0.0"
-rand = "0.6.5"
+rand = "0.7.3"
 tempfile = "3.0.7"
 walkdir = "2.2.7"
+
+[[bench]]
+name = "benches"
+harness = false
 
 [dependencies]
 slog = { version = "2.0.0-2.1" , features = ["max_level_trace", "release_max_level_warn"] }
@@ -25,6 +29,7 @@ failure_derive = "0.1.6"
 clap = { features = ["yaml"] }
 dotenv_codegen = "0.15.0"
 sled = "0.30.3"
+rand = "0.7.3"
 
 [profile.dev]
 opt-level = 0

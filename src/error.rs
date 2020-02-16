@@ -15,9 +15,13 @@ pub enum KVError {
     },
     #[fail(display = "An Utf8 error happened with the reader: {}", error)]
     Utf8 { error: str::Utf8Error },
+    #[fail(display = "An String Utf8 error happened: {}", error)]
+    StringUtf8 { error: std::string::FromUtf8Error },
     #[fail(display = "An error occured with sled engine: {}", error)]
     Sled { error: sled::Error },
-    #[fail(display = "{}", _0)]
+    #[fail(display = "Wrong engine.")]
+    WrongEngine,
+    #[fail(display = "Fail to get value from {}", _0)]
     FailGet(String),
     #[fail(display = "Error reading entry from log file")]
     ReadLog,
@@ -40,6 +44,12 @@ impl From<io::Error> for KVError {
 impl From<str::Utf8Error> for KVError {
     fn from(err: str::Utf8Error) -> KVError {
         KVError::Utf8 { error: err }
+    }
+}
+
+impl From<std::string::FromUtf8Error> for KVError {
+    fn from(err: std::string::FromUtf8Error) -> KVError {
+        KVError::StringUtf8 { error: err }
     }
 }
 

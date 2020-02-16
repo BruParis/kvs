@@ -31,6 +31,7 @@ fn main() -> Result<()> {
                 let req = KVRequest::Get {
                     key: key.to_owned(),
                 };
+                
                 let mut kvClient = KVClient::new(addr, req)?;
                 if let Some(resp) = kvClient.connect()? {
                     println!("{}", resp);
