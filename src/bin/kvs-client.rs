@@ -23,8 +23,7 @@ fn main() -> Result<()> {
     if let (cmd, Some(sub_input)) = m.subcommand() {
         let addr = addr_subcmd_arg(sub_input);
         let key = sub_input.value_of("KEY").unwrap();
-        println!("{:#?}", sub_input);
-        // stream.write(cmd.as_bytes())?;
+        // println!("{:#?}", sub_input);
 
         match cmd {
             "get" => {
@@ -53,7 +52,13 @@ fn main() -> Result<()> {
                     key: key.to_owned(),
                 };
                 let mut kvClient = KVClient::new(addr, req)?;
-                kvClient.connect()?;
+                match kvClient.connect() {
+                    Ok(_) => {},
+                    Err(_) => {
+                        eprintln!("Key not found");
+                        process::exit(1)
+                    },
+                }
             }
             _ => process::exit(1),
         }
@@ -76,7 +81,7 @@ fn addr_subcmd_arg(sub_input: &clap::ArgMatches) -> String {
         port = splitVec[1];
     }
     let tcpAddr = format!("{}:{}", ipAddr, port);
-    println!("IPAdress: {}", tcpAddr);
+    // println!("IPAdress: {}", tcpAddr);
 
     tcpAddr
 }

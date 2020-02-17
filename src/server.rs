@@ -3,7 +3,7 @@ use slog::{Drain, Logger};
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::net::{TcpListener, TcpStream};
 
-use crate::common_struct::KVRequest;
+use crate::common_struct::{KVRequest, KVResponse};
 use crate::engines::KVEngine;
 use crate::error::{KVError, Result};
 
@@ -38,14 +38,17 @@ impl<E: KVEngine> KVServer<E> {
         reader.read(&mut buffer)?;
 
         let executed = self.executeCmd(buffer, log);
-        let resp: String;
+        let resp: KVResponse;
         match executed {
-            Ok(val) => resp = format!("val {}", val),
-            Err(error) => resp = format!("error {}", error),
+            Ok(val) => resp = KVResponse::Ok(Some(format!("{}", val))),
+            Err(error) => resp = KVResponse::Err(format!("error {}", error))
         }
 
+        let mut buf = vec![];
+        serde_json::to_writer(&mut buf, &resp)?;
+
         let mut writer = BufWriter::new(stream);
-        writer.write_all(resp.as_bytes())?;
+        writer.write_all(&buf)?;
 
         Ok(())
     }
@@ -57,7 +60,7 @@ impl<E: KVEngine> KVServer<E> {
         let mut resp = String::from("");
 
         if let Some(Ok(req_iter)) = deserialized.next() {
-            info!(log, "  -> received request: {:#?}", req_iter);
+            // info!(log, "  -> received request: {:#?}", req_iter);
 
             match req_iter {
                 KVRequest::Get { key } => resp = self.executeGetCmd(key)?,
@@ -65,7 +68,6 @@ impl<E: KVEngine> KVServer<E> {
                 KVRequest::Rm { key } => resp = self.executeRmCmd(key)?,
             }
         }
-
         Ok(resp)
     }
 
@@ -75,7 +77,7 @@ impl<E: KVEngine> KVServer<E> {
             Ok(value)
         } else {
             println!("Key not found");
-            Ok(format!("Failed to get value from key: {}", key))
+            Ok(String::from("Key not found"))
         }
     }
 

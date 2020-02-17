@@ -17,6 +17,8 @@ pub enum KVError {
     Utf8 { error: str::Utf8Error },
     #[fail(display = "An String Utf8 error happened: {}", error)]
     StringUtf8 { error: std::string::FromUtf8Error },
+    #[fail(display = "An string error ahppened: {}", _0)]
+    StringError(String),
     #[fail(display = "An error occured with sled engine: {}", error)]
     Sled { error: sled::Error },
     #[fail(display = "Wrong engine.")]
@@ -29,6 +31,8 @@ pub enum KVError {
     FailSet,
     #[fail(display = "An error occurred.")]
     FailRemove,
+    #[fail(display = "No response received from server")]
+    NoResponse,
     #[fail(display = "{}", _0)]
     EngineNotFound(String),
     #[fail(display = "An error occurred.")]

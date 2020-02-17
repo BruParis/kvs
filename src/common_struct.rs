@@ -11,18 +11,9 @@ pub enum KVRequest {
     Rm { key: String },
 }
 
-pub enum GetResponse {
+#[derive(Serialize, Deserialize, Debug)]
+pub enum KVResponse {
     Ok(Option<String>),
-    Err(String),
-}
-
-pub enum SetResponse {
-    Ok(()),
-    Err(String),
-}
-
-pub enum RmResponse {
-    Ok(()),
     Err(String),
 }
 
