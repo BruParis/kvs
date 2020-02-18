@@ -43,14 +43,10 @@ impl BufReaderPos {
         self.reader.seek(SeekFrom::Start(entry.pos))?;
         let mut buf = vec![0; entry.len as usize];
         self.reader.read_exact(&mut buf)?;
-        let serialized: String = buf.into_iter().map(|c| c as char).collect();
-        let mut deserialized = Deserializer::from_str(&serialized).into_iter::<KVPair>();
-        if let Some(kv_iter) = deserialized.next() {
-            let kv = kv_iter?;
-            return Ok(kv.val);
-        }
-
-        Err(KVError::ReadLog)
+        let entry_str = std::str::from_utf8(&mut buf)?;
+        let mut deserializer = Deserializer::from_str(entry_str);
+        let KVPair { key: _, val } = KVPair::deserialize(&mut deserializer)?;
+        Ok(val)
     }
 }
 

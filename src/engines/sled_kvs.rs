@@ -30,10 +30,10 @@ impl KVEngine for SledKVEngine {
         self.0.flush()?;
         Ok(())
     }
-    
-    fn get(&mut self, key: String) -> Result<Option<String>> {
 
-        Ok(self.0
+    fn get(&mut self, key: String) -> Result<Option<String>> {
+        Ok(self
+            .0
             .get(key)?
             .map(|i_vec| AsRef::<[u8]>::as_ref(&i_vec).to_vec())
             .map(String::from_utf8)
@@ -41,10 +41,9 @@ impl KVEngine for SledKVEngine {
     }
 
     fn remove(&mut self, key: String) -> Result<()> {
-        self.0.del(key.to_owned())?.ok_or(KVError::FailGet(format!(
-            "{}",
-            key.to_owned()))
-        )?;
+        self.0
+            .remove(key.to_owned())?
+            .ok_or(KVError::FailGet(format!("{}", key.to_owned())))?;
         self.0.flush()?;
         Ok(())
     }

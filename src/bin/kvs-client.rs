@@ -30,7 +30,7 @@ fn main() -> Result<()> {
                 let req = KVRequest::Get {
                     key: key.to_owned(),
                 };
-                
+
                 let mut kvClient = KVClient::new(addr, req)?;
                 if let Some(resp) = kvClient.connect()? {
                     println!("{}", resp);
@@ -53,11 +53,11 @@ fn main() -> Result<()> {
                 };
                 let mut kvClient = KVClient::new(addr, req)?;
                 match kvClient.connect() {
-                    Ok(_) => {},
+                    Ok(_) => {}
                     Err(_) => {
                         eprintln!("Key not found");
                         process::exit(1)
-                    },
+                    }
                 }
             }
             _ => process::exit(1),

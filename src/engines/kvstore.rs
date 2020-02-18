@@ -45,6 +45,7 @@ impl KVStore {
     pub fn compaction(&mut self) -> Result<()> {
         self.reader.seek(SeekFrom::Start(0))?;
         let stream = Deserializer::from_reader(&mut self.reader.reader).into_iter::<KVPair>();
+
         let index = &mut self.index;
         let mut kv_map = HashMap::new();
         stream.for_each(|res_kv| {
@@ -111,8 +112,6 @@ fn generate_index(reader: &mut BufReaderPos) -> HashMap<String, KVEntry> {
         };
         pos += len;
     }
-
-    // println!("BTreeMap index: {:?}", res);
 
     res
 }

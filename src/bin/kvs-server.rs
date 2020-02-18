@@ -28,7 +28,7 @@ fn main() -> Result<()> {
 
     let yaml = load_yaml!("cli-server.yml");
     let m = App::from_yaml(yaml).get_matches();
-    
+
     let mut ipAddr = "";
     let mut port = "";
     let mut engine = "";
@@ -40,18 +40,18 @@ fn main() -> Result<()> {
         ipAddr = splitVec[0];
         port = splitVec[1];
     }
-    
+
     if let Some(arg) = m.value_of("engine") {
         if arg != "kvs" && arg != "sled" {
             process::exit(1);
         }
         engine = arg;
     }
-    
+
     let tcpAddr = format!("{}:{}", ipAddr, port);
     // info!(log, "Storage engine: {}", engine);
     // info!(log, "Listening on port: {}", tcpAddr);
-    
+
     eprintln!("kvs-server {}", env!("CARGO_PKG_VERSION"));
     eprintln!("addr {}", tcpAddr);
 
@@ -63,7 +63,7 @@ fn main() -> Result<()> {
 fn start_server(addr: String, engine: String, log: &Logger) -> Result<()> {
     let current_path = std::env::current_dir()?;
     let engine = current_engine(engine, log);
-    
+
     match engine {
         Some(Engine::kvs) => {
             let mut server = KVServer::new(KVStore::open(&current_path)?);

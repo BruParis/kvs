@@ -1,9 +1,9 @@
-use serde_json::Deserializer;
-use serde::Deserialize;
+use crate::error::{KVError, Result};
 use crate::{KVRequest, KVResponse};
+use serde::Deserialize;
+use serde_json::Deserializer;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::net::TcpStream;
-use crate::error::{KVError, Result};
 
 pub struct KVClient {
     req: KVRequest,
@@ -38,10 +38,10 @@ impl KVClient {
         let res = std::str::from_utf8(&buffer[0..size])?;
         let mut deserializer = Deserializer::from_str(res);
 
-        let mut resp = KVResponse::deserialize(&mut deserializer)?;
-        match resp {
+        // let mut resp = KVResponse::deserialize(&mut deserializer)?;
+        match KVResponse::deserialize(&mut deserializer)? {
             KVResponse::Ok(value) => Ok(value),
-            KVResponse::Err(msg) => Err(KVError::StringError(msg))
+            KVResponse::Err(msg) => Err(KVError::StringError(msg)),
         }
     }
 }

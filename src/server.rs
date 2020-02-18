@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use serde_json::Deserializer;
 use slog::{Drain, Logger};
 use std::io::{BufReader, BufWriter, Read, Write};
@@ -35,13 +36,13 @@ impl<E: KVEngine> KVServer<E> {
         let mut reader = BufReader::new(stream);
 
         let mut buffer = [0; 512];
-        reader.read(&mut buffer)?;
+        reader.read_exact(&mut buffer)?;
 
-        let executed = self.executeCmd(buffer, log);
+        let executed = self.execute_cmd(buffer, log);
         let resp: KVResponse;
         match executed {
             Ok(val) => resp = KVResponse::Ok(Some(format!("{}", val))),
-            Err(error) => resp = KVResponse::Err(format!("error {}", error))
+            Err(error) => resp = KVResponse::Err(format!("error {}", error)),
         }
 
         let mut buf = vec![];
@@ -53,25 +54,20 @@ impl<E: KVEngine> KVServer<E> {
         Ok(())
     }
 
-    fn executeCmd(&mut self, buffer: [u8; 512], log: &Logger) -> Result<String> {
+    fn execute_cmd(&mut self, mut buffer: [u8; 512], log: &Logger) -> Result<String> {
+        let serialized = std::str::from_utf8(&mut buffer)?;
+        let mut deserializer = Deserializer::from_str(&serialized);
 
-        let serialized: String = buffer.into_iter().map(|c| *c as char).collect();
-        let mut deserialized = Deserializer::from_str(&serialized).into_iter::<KVRequest>();
-        let mut resp = String::from("");
+        let req = KVRequest::deserialize(&mut deserializer)?;
 
-        if let Some(Ok(req_iter)) = deserialized.next() {
-            // info!(log, "  -> received request: {:#?}", req_iter);
-
-            match req_iter {
-                KVRequest::Get { key } => resp = self.executeGetCmd(key)?,
-                KVRequest::Set { key, val } => resp = self.executeSetCmd(key, val)?,
-                KVRequest::Rm { key } => resp = self.executeRmCmd(key)?,
-            }
+        match req {
+            KVRequest::Get { key } => self.execute_get_cmd(key),
+            KVRequest::Set { key, val } => self.execute_set_cmd(key, val),
+            KVRequest::Rm { key } => self.execute_rm_cmd(key),
         }
-        Ok(resp)
     }
 
-    fn executeGetCmd(&mut self, key: String) -> Result<String> {
+    fn execute_get_cmd(&mut self, key: String) -> Result<String> {
         if let Some(value) = self.engine.get(key.to_owned())? {
             println!("{}", value);
             Ok(value)
@@ -81,8 +77,7 @@ impl<E: KVEngine> KVServer<E> {
         }
     }
 
-    fn executeSetCmd(&mut self, key: String, val: String) -> Result<String> {
-
+    fn execute_set_cmd(&mut self, key: String, val: String) -> Result<String> {
         self.engine.set(key.to_owned(), val.to_owned())?;
         Ok(format!(
             "set key: {} value: {} succesffully done !",
@@ -90,15 +85,12 @@ impl<E: KVEngine> KVServer<E> {
         ))
     }
 
-    fn executeRmCmd(&mut self, key: String) -> Result<String> {
+    fn execute_rm_cmd(&mut self, key: String) -> Result<String> {
         match self.engine.remove(key.to_owned()) {
             Ok(()) => Ok(format!("rm key: {} succesffully done !", key)),
             Err(_) => {
                 println!("Key not found");
-                return Err(KVError::FailGet(format!(
-                    "{}",
-                    key
-                )));
+                return Err(KVError::FailGet(format!("{}", key)));
             }
         }
     }
