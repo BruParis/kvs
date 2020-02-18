@@ -7,7 +7,7 @@ extern crate slog_async;
 extern crate slog_term;
 
 use clap::App;
-use kvs::{KVEngine, KVRequest, KVServer, KVStore, Result, SledKVEngine};
+use kvs::{KVServer, KVStore, Result, SledKVEngine};
 use slog::{Drain, Logger};
 use std::process;
 

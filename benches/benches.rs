@@ -54,7 +54,7 @@ fn engine_read(c: &mut Criterion) {
             }
             let mut rng = StdRng::from_seed([0; 32]);
             b.iter(|| {
-                for i in 1..(1 << 2) {
+                for _i in 1..(1 << 2) {
                     let rand_num = rng.gen::<u8>();
                     store.get(format!("{}", rand_num)).unwrap();
                 }
@@ -70,7 +70,7 @@ fn engine_read(c: &mut Criterion) {
         }
         let mut rng = StdRng::from_seed([0; 32]);
         b.iter(|| {
-            for i in 1..(1 << 2) {
+            for _i in 1..(1 << 2) {
                 let rand_num = rng.gen::<u8>();
                 store.get(format!("{}", rand_num)).unwrap();
             }

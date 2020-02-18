@@ -11,7 +11,7 @@ impl SledKVEngine {
         match dir_path.to_str() {
             Some(dir_str) => {
                 let kvs_path = format!("{}{}", dir_str, "/log_file.txt");
-                if (Path::new(&kvs_path.to_owned()).exists()) {
+                if Path::new(&kvs_path.to_owned()).exists() {
                     return Err(KVError::WrongEngine);
                 }
 

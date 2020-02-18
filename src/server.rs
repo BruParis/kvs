@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use serde_json::Deserializer;
-use slog::{Drain, Logger};
+use slog::{Logger};
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::net::{TcpListener, TcpStream};
 
@@ -54,7 +54,7 @@ impl<E: KVEngine> KVServer<E> {
         Ok(())
     }
 
-    fn execute_cmd(&mut self, mut buffer: [u8; 512], log: &Logger) -> Result<String> {
+    fn execute_cmd(&mut self, mut buffer: [u8; 512], _log: &Logger) -> Result<String> {
         let serialized = std::str::from_utf8(&mut buffer)?;
         let mut deserializer = Deserializer::from_str(&serialized);
 

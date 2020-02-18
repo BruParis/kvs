@@ -1,4 +1,4 @@
-use crate::error::{KVError, Result};
+use crate::error::{Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Deserializer;
 use std::fs::File;
