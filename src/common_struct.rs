@@ -2,7 +2,7 @@ use crate::error::{Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Deserializer;
 use std::fs::File;
-use std::io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write};
+use std::io::{BufReader, BufWriter, Seek, SeekFrom, Write};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum KVRequest {
@@ -41,10 +41,7 @@ impl BufReaderPos {
 
     pub fn read_entry(&mut self, entry: &KVEntry) -> Result<String> {
         self.reader.seek(SeekFrom::Start(entry.pos))?;
-        let mut buf = vec![0; entry.len as usize];
-        self.reader.read_exact(&mut buf)?;
-        let entry_str = std::str::from_utf8(&mut buf)?;
-        let mut deserializer = Deserializer::from_str(entry_str);
+        let mut deserializer = Deserializer::from_reader(&mut self.reader);
         let KVPair { key: _, val } = KVPair::deserialize(&mut deserializer)?;
         Ok(val)
     }

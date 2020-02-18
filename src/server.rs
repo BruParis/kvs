@@ -55,8 +55,7 @@ impl<E: KVEngine> KVServer<E> {
     }
 
     fn execute_cmd(&mut self, mut buffer: [u8; 512], _log: &Logger) -> Result<String> {
-        let serialized = std::str::from_utf8(&mut buffer)?;
-        let mut deserializer = Deserializer::from_str(&serialized);
+        let mut deserializer = Deserializer::from_slice(&mut buffer);
 
         let req = KVRequest::deserialize(&mut deserializer)?;
 
