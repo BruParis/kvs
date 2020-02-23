@@ -55,7 +55,7 @@ impl<E: KVEngine> KVServer<E> {
     }
 
     fn execute_cmd(&mut self, buffer: [u8; 512], _log: &Logger) -> Result<String> {
-        let mut deserializer = Deserializer::from_slice(& buffer);
+        let mut deserializer = Deserializer::from_slice(&buffer);
 
         let req = KVRequest::deserialize(&mut deserializer)?;
 

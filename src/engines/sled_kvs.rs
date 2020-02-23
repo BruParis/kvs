@@ -19,7 +19,7 @@ impl SledKVEngine {
                 let db = sled::open(db_path)?;
                 Ok(SledKVEngine(db))
             }
-            None => Err(KVError::None)
+            None => Err(KVError::None),
         }
     }
 }

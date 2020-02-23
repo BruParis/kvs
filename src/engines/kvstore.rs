@@ -38,7 +38,7 @@ impl KVStore {
                     index,
                 })
             }
-            None => Err(KVError::None)
+            None => Err(KVError::None),
         }
     }
 
