@@ -1,8 +1,7 @@
 #[macro_use]
 extern crate clap;
-
-#[macro_use]
 extern crate dotenv_codegen;
+
 use clap::App;
 // use std::env;
 use kvs::{KVClient, KVRequest, Result};
@@ -31,8 +30,8 @@ fn main() -> Result<()> {
                     key: key.to_owned(),
                 };
 
-                let mut kvClient = KVClient::new(addr, req)?;
-                if let Some(resp) = kvClient.connect()? {
+                let mut kv_client = KVClient::new(addr, req)?;
+                if let Some(resp) = kv_client.connect()? {
                     println!("{}", resp);
                 } else {
                     println!("Key not found");
@@ -44,15 +43,15 @@ fn main() -> Result<()> {
                     key: key.to_owned(),
                     val: val.to_owned(),
                 };
-                let mut kvClient = KVClient::new(addr, req)?;
-                kvClient.connect()?;
+                let mut kv_client = KVClient::new(addr, req)?;
+                kv_client.connect()?;
             }
             "rm" => {
                 let req = KVRequest::Rm {
                     key: key.to_owned(),
                 };
-                let mut kvClient = KVClient::new(addr, req)?;
-                match kvClient.connect() {
+                let mut kv_client = KVClient::new(addr, req)?;
+                match kv_client.connect() {
                     Ok(_) => {}
                     Err(_) => {
                         eprintln!("Key not found");
@@ -70,18 +69,18 @@ fn main() -> Result<()> {
 }
 
 fn addr_subcmd_arg(sub_input: &clap::ArgMatches) -> String {
-    let mut ipAddr = "";
+    let mut ip_addr = "";
     let mut port = "";
     if let Some(arg) = sub_input.value_of("addr") {
-        let splitVec: Vec<&str> = arg.split(":").collect();
-        if splitVec.len() != 2 {
+        let split_vec: Vec<&str> = arg.split(':').collect();
+        if split_vec.len() != 2 {
             process::exit(1);
         }
-        ipAddr = splitVec[0];
-        port = splitVec[1];
+        ip_addr = split_vec[0];
+        port = split_vec[1];
     }
-    let tcpAddr = format!("{}:{}", ipAddr, port);
+    let tcp_addr = format!("{}:{}", ip_addr, port);
     // println!("IPAdress: {}", tcpAddr);
 
-    tcpAddr
+    tcp_addr
 }

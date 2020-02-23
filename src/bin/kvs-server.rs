@@ -14,8 +14,8 @@ use std::process;
 // use hello_web_server::ThreadPool;
 
 enum Engine {
-    kvs,
-    sled,
+    Kvs,
+    Sled,
 }
 
 fn main() -> Result<()> {
@@ -29,16 +29,16 @@ fn main() -> Result<()> {
     let yaml = load_yaml!("cli-server.yml");
     let m = App::from_yaml(yaml).get_matches();
 
-    let mut ipAddr = "";
+    let mut ip_addr = "";
     let mut port = "";
     let mut engine = "";
     if let Some(arg) = m.value_of("addr") {
-        let splitVec: Vec<&str> = arg.split(":").collect();
-        if splitVec.len() != 2 {
+        let split_vec: Vec<&str> = arg.split(':').collect();
+        if split_vec.len() != 2 {
             process::exit(1);
         }
-        ipAddr = splitVec[0];
-        port = splitVec[1];
+        ip_addr = split_vec[0];
+        port = split_vec[1];
     }
 
     if let Some(arg) = m.value_of("engine") {
@@ -48,14 +48,14 @@ fn main() -> Result<()> {
         engine = arg;
     }
 
-    let tcpAddr = format!("{}:{}", ipAddr, port);
+    let tcp_addr = format!("{}:{}", ip_addr, port);
     // info!(log, "Storage engine: {}", engine);
     // info!(log, "Listening on port: {}", tcpAddr);
 
     eprintln!("kvs-server {}", env!("CARGO_PKG_VERSION"));
-    eprintln!("addr {}", tcpAddr);
+    eprintln!("addr {}", tcp_addr);
 
-    start_server(tcpAddr.to_owned(), engine.to_owned(), &log)?;
+    start_server(tcp_addr, engine.to_owned(), &log)?;
 
     Ok(())
 }
@@ -65,11 +65,11 @@ fn start_server(addr: String, engine: String, log: &Logger) -> Result<()> {
     let engine = current_engine(engine, log);
 
     match engine {
-        Some(Engine::kvs) => {
+        Some(Engine::Kvs) => {
             let mut server = KVServer::new(KVStore::open(&current_path)?);
             server.run(addr, log)?;
         }
-        Some(Engine::sled) => {
+        Some(Engine::Sled) => {
             let mut server = KVServer::new(SledKVEngine::open(&current_path)?);
             server.run(addr, log)?;
         }
@@ -91,8 +91,8 @@ fn start_server(addr: String, engine: String, log: &Logger) -> Result<()> {
 
 fn current_engine(engine: String, log: &Logger) -> Option<Engine> {
     match engine.as_ref() {
-        "kvs" => Some(Engine::kvs),
-        "sled" => Some(Engine::sled),
+        "kvs" => Some(Engine::Kvs),
+        "sled" => Some(Engine::Sled),
         _ => {
             warn!(log, "Error -> engine {} found not found", engine);
             None

@@ -4,7 +4,6 @@ pub use engines::{KVEngine, KVStore, SledKVEngine};
 pub use error::{KVError, Result};
 pub use server::KVServer;
 
-#[macro_use]
 extern crate slog;
 
 mod client;

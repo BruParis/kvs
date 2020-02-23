@@ -11,7 +11,7 @@ impl SledKVEngine {
         match dir_path.to_str() {
             Some(dir_str) => {
                 let kvs_path = format!("{}{}", dir_str, "/log_file.txt");
-                if Path::new(&kvs_path.to_owned()).exists() {
+                if Path::new(&kvs_path).exists() {
                     return Err(KVError::WrongEngine);
                 }
 
@@ -19,14 +19,14 @@ impl SledKVEngine {
                 let db = sled::open(db_path)?;
                 Ok(SledKVEngine(db))
             }
-            None => return Err(KVError::None),
+            None => Err(KVError::None)
         }
     }
 }
 
 impl KVEngine for SledKVEngine {
     fn set(&mut self, key: String, value: String) -> Result<()> {
-        self.0.set(key, value.as_bytes()).map(|_| ())?;
+        self.0.insert(key, value.as_bytes()).map(|_| ())?;
         self.0.flush()?;
         Ok(())
     }
@@ -43,7 +43,7 @@ impl KVEngine for SledKVEngine {
     fn remove(&mut self, key: String) -> Result<()> {
         self.0
             .remove(key.to_owned())?
-            .ok_or(KVError::FailGet(format!("{}", key.to_owned())))?;
+            .ok_or(KVError::FailGet(key))?;
         self.0.flush()?;
         Ok(())
     }

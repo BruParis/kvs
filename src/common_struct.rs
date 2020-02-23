@@ -1,4 +1,4 @@
-use crate::error::{Result};
+use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Deserializer;
 use std::fs::File;
@@ -42,7 +42,7 @@ impl BufReaderPos {
     pub fn read_entry(&mut self, entry: &KVEntry) -> Result<String> {
         self.reader.seek(SeekFrom::Start(entry.pos))?;
         let mut deserializer = Deserializer::from_reader(&mut self.reader);
-        let KVPair { key: _, val } = KVPair::deserialize(&mut deserializer)?;
+        let KVPair { val, .. } = KVPair::deserialize(&mut deserializer)?;
         Ok(val)
     }
 }
@@ -63,7 +63,7 @@ impl BufWriterPos {
         BufWriterPos { writer, pos }
     }
 
-    pub fn append_log_file(&mut self, key: &String, val: &String) -> Result<(u64, u64)> {
+    pub fn append_log_file(&mut self, key: &str, val: &str) -> Result<(u64, u64)> {
         let start_pos = self.pos;
         // println!("                  self.pos: {}", self.pos);
 

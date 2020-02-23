@@ -23,7 +23,7 @@ impl KVStore {
         match dir_path.to_str() {
             Some(dir_str) => {
                 let sled_path = format!("{}{}", dir_str, "/my_old_db");
-                if Path::new(&sled_path.to_owned()).exists() {
+                if Path::new(&sled_path).exists() {
                     return Err(KVError::WrongEngine);
                 }
 
@@ -38,7 +38,7 @@ impl KVStore {
                     index,
                 })
             }
-            None => return Err(KVError::None),
+            None => Err(KVError::None)
         }
     }
 
@@ -101,7 +101,7 @@ fn generate_index(reader: &mut BufReaderPos) -> HashMap<String, KVEntry> {
         let len = stream.byte_offset() as u64 - pos;
         match kv_iter {
             Ok(kv) => {
-                if kv.val.to_owned() != "rm" {
+                if kv.val != "rm" {
                     let entry = KVEntry::new(false, len, pos);
                     res.insert(kv.key, entry)
                 } else {
@@ -120,7 +120,7 @@ impl KVEngine for KVStore {
     fn set(&mut self, key: String, value: String) -> Result<()> {
         let (len, pos) = self.writer.append_log_file(&key, &value)?;
         let entry = KVEntry::new(false, len, pos);
-        self.index.insert(key.to_owned(), entry);
+        self.index.insert(key, entry);
         self.compaction()?;
 
         Ok(())
@@ -134,7 +134,7 @@ impl KVEngine for KVStore {
                 } else {
                     // println!("         get - check log_file");
                     let val = self.reader.read_entry(entry)?;
-                    Ok(Some(val.to_owned()))
+                    Ok(Some(val))
                 }
             }
             None => Ok(None),
@@ -148,9 +148,9 @@ impl KVEngine for KVStore {
             (*entry).rm = true;
             self.compaction()?;
 
-            return Ok(());
+            Ok(())
         } else {
-            return Err(KVError::FailRemove);
+            Err(KVError::FailRemove)
         }
     }
 }

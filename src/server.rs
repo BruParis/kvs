@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use serde_json::Deserializer;
-use slog::{Logger};
+use slog::Logger;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::net::{TcpListener, TcpStream};
 
@@ -36,12 +36,12 @@ impl<E: KVEngine> KVServer<E> {
         let mut reader = BufReader::new(stream);
 
         let mut buffer = [0; 512];
-        reader.read_exact(&mut buffer)?;
+        reader.read(&mut buffer)?;
 
         let executed = self.execute_cmd(buffer, log);
         let resp: KVResponse;
         match executed {
-            Ok(val) => resp = KVResponse::Ok(Some(format!("{}", val))),
+            Ok(val) => resp = KVResponse::Ok(Some(val)),
             Err(error) => resp = KVResponse::Err(format!("error {}", error)),
         }
 
@@ -54,8 +54,8 @@ impl<E: KVEngine> KVServer<E> {
         Ok(())
     }
 
-    fn execute_cmd(&mut self, mut buffer: [u8; 512], _log: &Logger) -> Result<String> {
-        let mut deserializer = Deserializer::from_slice(&mut buffer);
+    fn execute_cmd(&mut self, buffer: [u8; 512], _log: &Logger) -> Result<String> {
+        let mut deserializer = Deserializer::from_slice(& buffer);
 
         let req = KVRequest::deserialize(&mut deserializer)?;
 
@@ -67,7 +67,7 @@ impl<E: KVEngine> KVServer<E> {
     }
 
     fn execute_get_cmd(&mut self, key: String) -> Result<String> {
-        if let Some(value) = self.engine.get(key.to_owned())? {
+        if let Some(value) = self.engine.get(key)? {
             println!("{}", value);
             Ok(value)
         } else {
@@ -89,7 +89,7 @@ impl<E: KVEngine> KVServer<E> {
             Ok(()) => Ok(format!("rm key: {} succesffully done !", key)),
             Err(_) => {
                 println!("Key not found");
-                return Err(KVError::FailGet(format!("{}", key)));
+                Err(KVError::FailGet(key))
             }
         }
     }

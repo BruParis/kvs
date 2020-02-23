@@ -30,6 +30,7 @@ impl KVClient {
         let mut buf = vec![];
         serde_json::to_writer(&mut buf, &self.req)?;
         let _len = buf.len() as u64;
+
         self.writer.write_all(&buf)?;
         self.writer.flush()?;
 
