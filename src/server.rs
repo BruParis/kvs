@@ -36,7 +36,7 @@ impl<E: KVEngine> KVServer<E> {
         let mut reader = BufReader::new(stream);
 
         let mut buffer = [0; 512];
-        reader.read(&mut buffer)?;
+        reader.read(&mut buffer)?; // need check if read_exact works here 
 
         let executed = self.execute_cmd(buffer, log);
         let resp: KVResponse;

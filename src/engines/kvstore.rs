@@ -2,15 +2,15 @@ use crate::common_struct::KVPair;
 use crate::engines::KVEngine;
 use crate::error::{KVError, Result};
 
-use std::io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write};
-use std::collections::HashMap;
-use std::fs::{File, OpenOptions};
-use std::sync::{Arc, Mutex};
-use std::cell::RefCell;
-use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
 use serde::Deserialize;
 use serde_json::Deserializer;
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+use std::collections::HashMap;
+use std::fs::{File, OpenOptions};
+use std::io::{BufReader, BufWriter, Read, Seek, SeekFrom, Write};
+use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 
 const COMPACTION_THRESHOLD: u64 = 1024;
 
@@ -32,7 +32,7 @@ impl KVStore {
                 }
 
                 let log_path = Path::new(dir_str).join("log_file.txt");
-                let mut readers = BufReaderMap::new(&log_path);
+                let readers = BufReaderMap::new(&log_path);
                 let writer = BufWriterPos::new(&log_path)?;
 
                 Ok(KVStore {
@@ -41,7 +41,6 @@ impl KVStore {
                     writer: Arc::new(Mutex::new(writer)),
                     readers: readers,
                 })
-
             }
             None => Err(KVError::None),
         }
@@ -70,7 +69,6 @@ impl KVEngine for KVStore {
     fn remove(&self, key: String) -> Result<()> {
         self.writer.lock().unwrap().remove(key)
     }
-
 }
 
 impl Clone for KVStore {
@@ -108,7 +106,7 @@ impl BufReaderMap {
     }
 
     fn generate_index(&self) -> HashMap<String, KVEntry> {
-        let mut index = HashMap::new();
+        let index = HashMap::new();
         index
     }
 }
@@ -123,17 +121,17 @@ struct BufWriterPos {
 
 impl BufWriterPos {
     fn new(file_path: &PathBuf) -> Result<Self> {
-        let mut file = OpenOptions::new()
+        let file = OpenOptions::new()
             .write(true)
             .create(true)
             .append(true)
             .open(file_path)?;
-        
+
         let writer = BufWriter::new(file);
         let reader = BufReaderMap::new(file_path);
         let index = reader.generate_index();
 
-        Ok(BufWriterPos { 
+        Ok(BufWriterPos {
             reader: reader,
             index: Arc::new(index),
             writer: Arc::new(writer),
@@ -143,7 +141,11 @@ impl BufWriterPos {
 
     pub fn set(&mut self, key: String, value: String) -> Result<()> {
         let (len, pos) = self.append_log_file(&key, &value)?;
-        let entry = KVEntry {rm: false, len: len, pos: pos};
+        let entry = KVEntry {
+            rm: false,
+            len: len,
+            pos: pos,
+        };
         Arc::get_mut(&mut self.index).unwrap().insert(key, entry);
 
         // self.compaction()?;
@@ -165,7 +167,6 @@ impl BufWriterPos {
     }
 
     fn append_log_file(&mut self, key: &str, val: &str) -> Result<(usize, usize)> {
-
         // println!("                  self.pos: {}", self.pos);
 
         let kv_pair: KVPair = KVPair::new(key.to_owned(), val.to_owned());
@@ -240,9 +241,12 @@ struct BufReaderPos<T: Seek + Read> {
 
 impl<T: Seek + Read> BufReaderPos<T> {
     fn new(inner: T) -> Self {
-        BufReaderPos { reader: BufReader::new(inner), pos: 0 }
+        BufReaderPos {
+            reader: BufReader::new(inner),
+            pos: 0,
+        }
     }
-    
+
     fn generate_index(&mut self) -> HashMap<String, KVEntry> {
         //let reader = Arc::get_mut(&mut self.reader).unwrap();
         let mut stream = Deserializer::from_reader(&mut self.reader).into_iter::<KVPair>();
@@ -253,7 +257,11 @@ impl<T: Seek + Read> BufReaderPos<T> {
             match kv_iter {
                 Ok(kv) => {
                     if kv.val != "rm" {
-                        let entry = KVEntry { rm: false, len: len, pos: self.pos };
+                        let entry = KVEntry {
+                            rm: false,
+                            len: len,
+                            pos: self.pos,
+                        };
                         index.insert(kv.key, entry)
                     } else {
                         None

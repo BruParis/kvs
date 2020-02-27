@@ -22,7 +22,7 @@ fn engine_write(c: &mut Criterion) {
                     let temp_dir = TempDir::new().unwrap();
                     (KVStore::open(temp_dir.path()).unwrap(), temp_dir)
                 },
-                |(mut store, _temp_dir)| {
+                |(store, _temp_dir)| {
                     // for i in 1..(1 << 12) {
                     for i in 1..(1 << 2) {
                         store.set(format!("{}", i), "bench".to_string()).unwrap();
@@ -39,7 +39,7 @@ fn engine_write(c: &mut Criterion) {
                 let temp_dir = TempDir::new().unwrap();
                 (SledKVEngine::open(temp_dir.path()).unwrap(), temp_dir)
             },
-            |(mut store, _temp_dir)| {
+            |(store, _temp_dir)| {
                 for i in 1..(1 << 2) {
                     store.set(format!("{}", i), "bench".to_string()).unwrap();
                 }
@@ -68,7 +68,7 @@ fn engine_read(c: &mut Criterion) {
     c.bench("kvs_write", bench);
 }
 
-fn read_setup_and_bench<E: KVEngine>(b: &mut criterion::Bencher<'_>, mut engine: E) {
+fn read_setup_and_bench<E: KVEngine>(b: &mut criterion::Bencher<'_>, engine: E) {
     let mut vec_pair = generate_pair();
 
     vec_pair.iter_mut().for_each(|pair| {
