@@ -4,6 +4,7 @@ use std::path::Path;
 use crate::engines::KVEngine;
 use crate::error::{KVError, Result};
 
+#[derive(Clone)]
 pub struct SledKVEngine(Db);
 
 impl SledKVEngine {
@@ -25,13 +26,13 @@ impl SledKVEngine {
 }
 
 impl KVEngine for SledKVEngine {
-    fn set(&mut self, key: String, value: String) -> Result<()> {
+    fn set(&self, key: String, value: String) -> Result<()> {
         self.0.insert(key, value.as_bytes()).map(|_| ())?;
         self.0.flush()?;
         Ok(())
     }
 
-    fn get(&mut self, key: String) -> Result<Option<String>> {
+    fn get(&self, key: String) -> Result<Option<String>> {
         Ok(self
             .0
             .get(key)?
@@ -40,7 +41,7 @@ impl KVEngine for SledKVEngine {
             .transpose()?)
     }
 
-    fn remove(&mut self, key: String) -> Result<()> {
+    fn remove(&self, key: String) -> Result<()> {
         self.0
             .remove(key.to_owned())?
             .ok_or(KVError::FailGet(key))?;

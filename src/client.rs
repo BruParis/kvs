@@ -12,7 +12,7 @@ pub struct KVClient {
 }
 
 impl KVClient {
-    pub fn new(addr: String, req: KVRequest) -> Result<KVClient> {
+    pub fn new(addr: String, req: KVRequest) -> Result<Self> {
         let stream_w = TcpStream::connect(&addr)?;
         let stream_r = stream_w.try_clone()?;
         let writer = BufWriter::new(stream_w);
